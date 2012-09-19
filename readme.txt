@@ -10,7 +10,7 @@ Import posts, pages, comments, custom fields, categories, tags and more from a W
 
 == Description ==
 
-The ReadyMade WordPress Importer is a branch of the default WordPress importer. This version modifies the default in three ways:
+The ReadyMade WordPress Importer is a branch of the default WordPress importer. Our version modifies the default in three ways:
 
 1. If there is an attachment in the WXR and the importer is not able to determine the file type from the file name (ie missing extension), the patched version will make a light (body-less) request to the web server where the file is hosted for information we can use about the file. The things we're interested in are file type, size, and filename.
 1. If the importer is processing an attachment under the above situation, and it is able to determine the file type, then it will rewrite the local version of the file to have the appropriate file extension.

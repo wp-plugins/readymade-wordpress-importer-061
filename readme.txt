@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: readymadeweb
+Contributors: ReadyMadeWeb
 Donate link: 
 Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0

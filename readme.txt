@@ -15,7 +15,7 @@ The ReadyMade WordPress Importer is a branch of the default WordPress importer. 
 1. If there is an attachment in the WXR and the importer is not able to determine the file type from the file name (ie missing extension), the patched version will make a light (body-less) request to the web server where the file is hosted for information we can use about the file. The things we're interested in are file type, size, and filename.
 1. If the importer is processing an attachment under the above situation, and it is able to determine the file type, then it will rewrite the local version of the file to have the appropriate file extension.
 
-ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad data to WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding a MIME type detection as a fallback, we prevent many files from being excluded from the import process.
+ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad and MovableType MTIF data file to WordPress WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding a MIME type detection as a fallback, we prevent many files from being excluded from the import process.
 
 == Installation ==
 
@@ -45,7 +45,7 @@ A message like "Fatal error: Allowed memory size of 8388608 bytes exhausted" ind
 
 For those with shared hosting, the best alternative may be to consult hosting support to determine the safest approach for running the import. A host may be willing to temporarily lift the memory limit and/or run the process directly from their end.
 
--- [WordPress Codex: Importing Content](http://codex.wordpress.org/Importing_Content#Before_Importing)
+[WordPress Codex: Importing Content](http://codex.wordpress.org/Importing_Content#Before_Importing)
 
 == Filters ==
 

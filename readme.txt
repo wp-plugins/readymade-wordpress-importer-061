@@ -33,10 +33,10 @@ The quickest method for installing the importer is:
 == Changelog ==
 
 = 0.6.3 =
-* Reads MIME type for files without proper file extensions
+* Adds site IP address verification through third-party lookup to stop self-referencing server setups from preventing importation of files.
 
 = 0.6.2 =
-* Reads MIME type for files without proper file extensions
+* Reads MIME type for files without proper file extensions.
 
 == Frequently Asked Questions ==
 

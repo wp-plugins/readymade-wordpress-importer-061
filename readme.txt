@@ -4,18 +4,19 @@ Donate link:
 Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0
 Tested up to: 3.4
-Stable tag: 0.6.2
+Stable tag: 0.6.3
 
 Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 
 == Description ==
 
-The ReadyMade WordPress Importer is a branch of the default WordPress importer. This version modifies the default in two ways:
+The ReadyMade WordPress Importer is a branch of the default WordPress importer. This version modifies the default in three ways:
 
 1. If there is an attachment in the WXR and the importer is not able to determine the file type from the file name (ie missing extension), the patched version will make a light (body-less) request to the web server where the file is hosted for information we can use about the file. The things we're interested in are file type, size, and filename.
 1. If the importer is processing an attachment under the above situation, and it is able to determine the file type, then it will rewrite the local version of the file to have the appropriate file extension.
+1. When moving from one host to another, or from WordPress.com to a self-hosted site, you may setup hosting for yourdomain.com before publicy directing the DNS to the new server. This is the correct thing to do if importing using WXR files. However, some hosts will then process references to yourdomain.com as internal references, rather than links to outside resources. This means that the importation process is essentially short circuited, with the public version of yourdomain.com being invisible to your new server. ReadyMade WordPress Importer solve this problem by using our TW2WP.com servers to identify the public IP of the source server and us that, rather than the domain, to import files. 
 
-ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad and MovableType MTIF data file to WordPress WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding a MIME type detection as a fallback, we prevent many files from being excluded from the import process.
+ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad and MovableType MTIF data file to WordPress WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding MIME type detection as a fallback, we prevent many files from being excluded from the import process. In many cases, a TypePad or MovableType blog might feature no images what
 
 == Installation ==
 
@@ -27,13 +28,10 @@ The quickest method for installing the importer is:
 
 == Changelog ==
 
-= 0.6.2 =
+= 0.6.3 =
 * Reads MIME type for files without proper file extensions
 
-
-== Upgrade Notice ==
-
-= 0.6.2
+= 0.6.2 =
 * Reads MIME type for files without proper file extensions
 
 == Frequently Asked Questions ==
@@ -45,7 +43,7 @@ A message like "Fatal error: Allowed memory size of 8388608 bytes exhausted" ind
 
 For those with shared hosting, the best alternative may be to consult hosting support to determine the safest approach for running the import. A host may be willing to temporarily lift the memory limit and/or run the process directly from their end.
 
-[WordPress Codex: Importing Content](http://codex.wordpress.org/Importing_Content#Before_Importing)
+More Info: [WordPress Codex: Importing Content](http://codex.wordpress.org/Importing_Content#Before_Importing)
 
 == Filters ==
 

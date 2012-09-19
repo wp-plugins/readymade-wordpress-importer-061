@@ -5,7 +5,7 @@ Plugin URI: http://wordpress.org/extend/plugins/wordpress-importer/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.2
+Version: 0.6.3
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -14,7 +14,7 @@ if ( ! defined( 'WP_LOAD_IMPORTERS' ) )
 	return;
 
 /** Display verbose errors */
-define( 'IMPORT_DEBUG', false );
+define( 'IMPORT_DEBUG', FALSE );
 
 // Load Importer API
 require_once ABSPATH . 'wp-admin/includes/import.php';
@@ -102,6 +102,8 @@ class WP_Import extends WP_Importer {
 	 * @param string $file Path to the WXR file for importing
 	 */
 	function import( $file ) {
+		set_time_limit(600);
+		ini_set('max_input_time', 600);
 		add_filter( 'import_post_meta_key', array( $this, 'is_valid_meta_key' ) );
 		add_filter( 'http_request_timeout', array( &$this, 'bump_request_timeout' ) );
 
@@ -892,8 +894,13 @@ class WP_Import extends WP_Importer {
 		if ( $upload['error'] )
 			return new WP_Error( 'upload_dir_error', $upload['error'] );
 
+		// Instead of using the native wp_get_http request, we instead need
+		// to use direct calls to curl, since we may not be able to trust the local
+		// machine's routing for importing files (such as if we're creating a
+		// WP install on a server thats configured to claim the same domain as
+		// the source we're importing from.)
 		// fetch the remote url and write it to the placeholder file
-		$headers = wp_get_http( $url, $upload['file'] );
+		$headers = $this->fetch_attachment( $url, $upload['file'] );
 
 		// request failed
 		if ( ! $headers ) {
@@ -1133,11 +1140,29 @@ class WP_Import extends WP_Importer {
 			'filename' => '',
 		);
 
-		$curl = curl_init();
+		$url_parts = parse_url( $url );
+		$world_ip = $this->global_ip_for_host( $url_parts['host'] );
+
+    $curl = curl_init();
+
+		// If we can't find a world routable IP, fall back on local routing
+		if ( ! empty( $world_ip ) ) {
+
+			if ( ! empty( $url_parts['query'] ) ) {
+      	$url_parts['path'] .= '?' . $url_parts['query'];
+			}
+
+	    $headers = array('Host: ' . $url_parts['host']);
+
+	    $url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
+      curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+	  }
+
 		curl_setopt( $curl, CURLOPT_URL, $url );
 		curl_setopt( $curl, CURLOPT_HEADER, TRUE );
 		curl_setopt( $curl, CURLOPT_NOBODY, TRUE );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
+		curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5);
 		$header_info = curl_exec( $curl );
 		curl_close( $curl );
 
@@ -1153,15 +1178,132 @@ class WP_Import extends WP_Importer {
 
 		$file_name_pattern = '/filename=([^\s]+)/i';
 		$file_name_matches = array();
+
 		if ( preg_match( $file_name_pattern, $header_info, $file_name_matches ) ) {
 			$results['filename'] = trim( $file_name_matches[1] );
 
-			if ( ( $index = strripos( $results['filename'], '.' ) ) !== FALSE ) {
-				$results['ext'] = substr( $results['filename'], $index + 1 );
-			}
+		} else {
+
+			$url_parts = parse_url( $url );
+			$results['filename'] = basename( $url_parts['path'] );
+		}
+
+		if ( ( $index = strripos( $results['filename'], '.' ) ) !== FALSE ) {
+
+			$results['ext'] = substr( $results['filename'], $index + 1 );
+
+			// If we can't extract the extension from the filename, guess from the
+			// content type
+		} elseif ( ! empty ($results['type'])) {
+
+			$mime_parts = explode( '/', $results['type'] );
+			$results['ext'] = $mime_parts[1];
+
 		}
 
 		return $results;
+	}
+
+	function fetch_attachment($url, $file_path) {
+
+		$url_parts = parse_url( $url );
+		$world_ip = $this->global_ip_for_host( $url_parts['host'] );
+
+		// If we can't find a world routable IP, fall back on local routing
+		if ( empty( $world_ip ) ) {
+
+			return wp_get_http( $url, $upload['file'] );
+
+		} else {
+
+			if ( ! empty( $url_parts['query'] ) ) {
+      	$url_parts['path'] .= '?' . $url_parts['query'];
+			}
+
+	    $headers = array('Host: ' . $url_parts['host']);
+
+	    $url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
+
+      $curl = curl_init();
+      curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+      curl_setopt( $curl, CURLOPT_URL, $url );
+      curl_setopt( $curl, CURLOPT_HEADER, FALSE );
+      curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
+
+      $result = curl_exec( $curl );
+      $response_headers = curl_getinfo( $curl );
+
+			// Now, map the CURL provided headers into the format that
+			// WP functions expect.
+			$wp_headers = array(
+				'response' => $response_headers['http_code'],
+				'content-length' => $response_headers['download_content_length'],
+			);
+
+      curl_close( $curl );
+
+			if ( false == $file_path )
+				return $wp_headers;
+
+			$out_fp = fopen($file_path, 'w');
+			if ( !$out_fp )
+				return $wp_headers;
+
+			fwrite( $out_fp,  $result );
+			fclose( $out_fp );
+			clearstatcache();
+
+			return $wp_headers;
+		}
+	}
+
+	/**
+	 * Returns the global IP for the given host, which might be different
+	 * from how the IP is routed locally, such as if the current server is
+	 * configured to claim the same domain as the domain we're importing from.
+	 *
+	 * @param string $host
+	 *   A valid host name, such as "www.example.org"
+	 *
+	 * @return string
+	 *   An IPv4 address
+	 */
+	function global_ip_for_host($host) {
+
+		if( ! class_exists( 'WP_Http' ) ) {
+    	include_once( ABSPATH . WPINC. '/class-http.php' );
+    }
+
+		static $ips;
+
+		if (!isset($ips[$host])) {
+
+			$request = array(
+				'method' => 'POST',
+				'body' => array(
+					'host' => $host,
+				),
+			);
+
+			$service_url = 'http://tp2wp.com/services/dns';
+
+			$result = wp_remote_post($service_url, $request);
+
+			if ( empty ( $result['body'] )) {
+
+				$ips[$host] = FALSE;
+
+			} else {
+
+				$body = json_decode( $result['body'] );
+
+				$ips[$host] = isset( $body->ip )
+					? $body->ip
+					: FALSE;
+			}
+		}
+
+		return $ips[$host];
 	}
 }
 

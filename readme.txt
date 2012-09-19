@@ -1,7 +1,7 @@
 === Plugin Name ===
-Contributors: wordpressdotorg
+Contributors: readymadeweb
 Donate link: 
-Tags: importer, wordpress
+Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0
 Tested up to: 3.4
 Stable tag: 0.6
@@ -10,75 +10,31 @@ Import posts, pages, comments, custom fields, categories, tags and more from a W
 
 == Description ==
 
-The WordPress Importer will import the following content from a WordPress export file:
+The ReadyMade WordPress Importer is a branch of the default WordPress importer. This version modifies the default in two ways:
 
-* Posts, pages and other custom post types
-* Comments
-* Custom fields and post meta
-* Categories, tags and terms from custom taxonomies
-* Authors
+1. If there is an attachment in the WXR and the importer is not able to determine the file type from the file name (ie missing extension), the patched version will make a light (body-less) request to the web server where the file is hosted for information we can use about the file. The things we're interested in are file type, size, and filename.
+1. If the importer is processing an attachment under the above situation, and it is able to determine the file type, then it will rewrite the local version of the file to have the appropriate file extension.
 
-For further information and instructions please see the [Codex page on Importing Content](http://codex.wordpress.org/Importing_Content#WordPress)
+ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad data to WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding a MIME type detection as a fallback, we prevent many files from being excluded from the import process.
 
 == Installation ==
 
 The quickest method for installing the importer is:
 
-1. Visit Tools -> Import in the WordPress dashboard
-1. Click on the WordPress link in the list of importers
-1. Click "Install Now"
-1. Finally click "Activate Plugin & Run Importer"
-
-If you would prefer to do things manually then follow these instructions:
-
-1. Upload the `wordpress-importer` folder to the `/wp-content/plugins/` directory
+1. Upload the `readymade-wordpress-importer` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Go to the Tools -> Import screen, click on WordPress
+1. Go to the Tools -> Import screen, click on 'ReadyMade WordPress Importer'
 
 == Changelog ==
 
-= 0.6 =
-* Support for WXR 1.2 and multiple CDATA sections
-* Post aren't duplicates if their post_type's are different
+= 0.6.2 =
+* Reads MIME Type for files without proper file extensions
 
-= 0.5.2 =
-* Double check that the uploaded export file exists before processing it. This prevents incorrect error messages when
-an export file is uploaded to a server with bad permissions and WordPress 3.3 or 3.3.1 is being used.
-
-= 0.5 =
-* Import comment meta (requires export from WordPress 3.2)
-* Minor bugfixes and enhancements
-
-= 0.4 =
-* Map comment user_id where possible
-* Import attachments from `wp:attachment_url`
-* Upload attachments to correct directory
-* Remap resized image URLs correctly
-
-= 0.3 =
-* Use an XML Parser if possible
-* Proper import support for nav menus
-* ... and much more, see [Trac ticket #15197](http://core.trac.wordpress.org/ticket/15197)
-
-= 0.1 =
-* Initial release
 
 == Upgrade Notice ==
 
-= 0.6 =
-Support for exports from WordPress 3.4.
-
-= 0.5.2 =
-Fix incorrect error message when the export file could not be uploaded.
-
-= 0.5 =
-Import comment meta and other minor bugfixes and enhancements.
-
-= 0.4 =
-Bug fixes for attachment importing and other small enhancements.
-
-= 0.3 =
-Upgrade for a more robust and reliable experience when importing WordPress export files, and for compatibility with WordPress 3.1.
+= 0.6.2
+* Reads MIME Type for files without proper file extensions
 
 == Frequently Asked Questions ==
 
@@ -93,7 +49,7 @@ For those with shared hosting, the best alternative may be to consult hosting su
 
 == Filters ==
 
-The importer has a couple of filters to allow you to completely enable/block certain features:
+Like the WordPress importer, ReadyMade WordPress Importer has filters that allow you to completely enable/block certain features:
 
 * `import_allow_create_users`: return false if you only want to allow mapping to existing users
 * `import_allow_fetch_attachments`: return false if you do not wish to allow importing and downloading of attachments

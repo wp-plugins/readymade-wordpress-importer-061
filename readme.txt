@@ -16,7 +16,11 @@ The ReadyMade WordPress Importer is a branch of the default WordPress importer. 
 1. If the importer is processing an attachment under the above situation, and it is able to determine the file type, then it will rewrite the local version of the file to have the appropriate file extension.
 1. When moving from one host to another, or from WordPress.com to a self-hosted site, you may setup hosting for yourdomain.com before publicy directing the DNS to the new server. This is the correct thing to do if importing using WXR files. However, some hosts will then process references to yourdomain.com as internal references, rather than links to outside resources. This means that the importation process is essentially short circuited, with the public version of yourdomain.com being invisible to your new server. ReadyMade WordPress Importer solve this problem by using our TW2WP.com servers to identify the public IP of the source server and us that, rather than the domain, to import files. 
 
-ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad and MovableType MTIF data file to WordPress WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding MIME type detection as a fallback, we prevent many files from being excluded from the import process. In many cases, a TypePad or MovableType blog might feature no images what
+ReadyMadeWeb developed this plugin in the process of creating a service to convert TypePad and MovableType MTIF data file to WordPress WXR formatted files.  During this process we've encountered some unique problems with TypePad data. Namely, many TypePad files, particularly images, are saved without file extensions. This prevents the default WordPress importer from importing those files into the wp-content/uploads folder. By adding MIME type detection as a fallback, we prevent many files from being excluded from the import process. With most converted TypePad data, imports would contain no images whatsoever wihout this plugin as nearly all images on TypePad sites are stored without file extensions.
+
+To convert your TypePad or MovableType MTIF data file to WordPress WXR data file and therefore preserve your attachments, permalinks, and more visit:
+
+[TP2WP.com](http://tp2wp.com)
 
 == Installation ==
 

@@ -28,13 +28,13 @@ The quickest method for installing the importer is:
 == Changelog ==
 
 = 0.6.2 =
-* Reads MIME Type for files without proper file extensions
+* Reads MIME type for files without proper file extensions
 
 
 == Upgrade Notice ==
 
 = 0.6.2
-* Reads MIME Type for files without proper file extensions
+* Reads MIME type for files without proper file extensions
 
 == Frequently Asked Questions ==
 

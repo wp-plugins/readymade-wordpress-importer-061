@@ -5,7 +5,7 @@ Plugin URI: http://wordpress.org/extend/plugins/wordpress-importer/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.3
+Version: 0.6.4
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -14,7 +14,7 @@ if ( ! defined( 'WP_LOAD_IMPORTERS' ) )
 	return;
 
 /** Display verbose errors */
-define( 'IMPORT_DEBUG', FALSE );
+define( 'IMPORT_DEBUG', false );
 
 // Load Importer API
 require_once ABSPATH . 'wp-admin/includes/import.php';
@@ -653,16 +653,16 @@ class WP_Import extends WP_Importer {
 				foreach ( $post['comments'] as $comment ) {
 					$comment_id	= $comment['comment_id'];
 					$newcomments[$comment_id]['comment_post_ID']			= $comment_post_ID;
-					$newcomments[$comment_id]['comment_author']			 = $comment['comment_author'];
+					$newcomments[$comment_id]['comment_author']				= $comment['comment_author'];
 					$newcomments[$comment_id]['comment_author_email'] = $comment['comment_author_email'];
 					$newcomments[$comment_id]['comment_author_IP']		= $comment['comment_author_IP'];
-					$newcomments[$comment_id]['comment_author_url']	 = $comment['comment_author_url'];
-					$newcomments[$comment_id]['comment_date']				 = $comment['comment_date'];
-					$newcomments[$comment_id]['comment_date_gmt']		 = $comment['comment_date_gmt'];
+					$newcomments[$comment_id]['comment_author_url']		= $comment['comment_author_url'];
+					$newcomments[$comment_id]['comment_date']					= $comment['comment_date'];
+					$newcomments[$comment_id]['comment_date_gmt']			= $comment['comment_date_gmt'];
 					$newcomments[$comment_id]['comment_content']			= $comment['comment_content'];
-					$newcomments[$comment_id]['comment_approved']		 = $comment['comment_approved'];
-					$newcomments[$comment_id]['comment_type']				 = $comment['comment_type'];
-					$newcomments[$comment_id]['comment_parent'] 		= $comment['comment_parent'];
+					$newcomments[$comment_id]['comment_approved']			= $comment['comment_approved'];
+					$newcomments[$comment_id]['comment_type']					= $comment['comment_type'];
+					$newcomments[$comment_id]['comment_parent']				= $comment['comment_parent'];
 					$newcomments[$comment_id]['commentmeta']					= isset( $comment['commentmeta'] ) ? $comment['commentmeta'] : array();
 					if ( isset( $this->processed_authors[$comment['comment_user_id']] ) )
 						$newcomments[$comment_id]['user_id'] = $this->processed_authors[$comment['comment_user_id']];
@@ -844,12 +844,16 @@ class WP_Import extends WP_Importer {
 		// have a valid extension, but we were able to determine one by looking at
 		// the relevant HTTP headers (as denoted by the
 		// 'force_extension_in_replacement' flag)
-		if ( preg_match( '!^image/!', $info['type'] ) && empty($upload['force_extension_in_replacement'])) {
+		if ( preg_match( '!^image/!', $info['type'] )) {
 			$parts = pathinfo( $url );
-			$name = basename( $parts['basename'], ".{$parts['extension']}" ); // PATHINFO_FILENAME in PHP 5.2
+			$extension = empty($upload['force_extension_in_replacement'])
+				? $parts['extension']
+				: '';
+
+			$name = basename( $parts['basename'], ".{$extension}" ); // PATHINFO_FILENAME in PHP 5.2
 
 			$parts_new = pathinfo( $upload['url'] );
-			$name_new = basename( $parts_new['basename'], ".{$parts_new['extension']}" );
+			$name_new = basename( $parts_new['basename'], ".{$extension}" );
 
 			$this->url_remap[$parts['dirname'] . '/' . $name] = $parts_new['dirname'] . '/' . $name_new;
 		}
@@ -877,7 +881,7 @@ class WP_Import extends WP_Importer {
 		// If there is a situation where we're adding a file extension
 		// onto an upload that didn't originally have one, we
 		// can tell the remapper to not strip off the extension/
-		$force_extension_in_replacement = FALSE;
+		$force_extension_in_replacement = false;
 
 		if ( empty( $file_type['ext'] ) ) {
 
@@ -885,7 +889,7 @@ class WP_Import extends WP_Importer {
 
 			if ( $retured_file_info ) {
 				$file_name = $retured_file_info['filename'];
-				$force_extension_in_replacement = TRUE;
+				$force_extension_in_replacement = true;
 			}
 		}
 
@@ -940,7 +944,7 @@ class WP_Import extends WP_Importer {
 			$this->url_remap[$headers['x-final-location']] = $upload['url'];
 
 		if ($force_extension_in_replacement)
-			$upload['force_extension_in_replacement'] = TRUE;
+			$upload['force_extension_in_replacement'] = true;
 		return $upload;
 	}
 
@@ -1125,7 +1129,7 @@ class WP_Import extends WP_Importer {
 	 *   A valid url to request mime info from
 	 *
 	 * @return array|bool
-	 *   If the server didn't return a valid header, FALSE is returned.  Otherwise,
+	 *   If the server didn't return a valid header, false is returned.  Otherwise,
 	 *   an array with the following keys is returned:
 	 *     'ext' (string):  The extension of the file, if avaiable
 	 *     'type' (string): The advertised mime type of the resource, if available
@@ -1143,31 +1147,31 @@ class WP_Import extends WP_Importer {
 		$url_parts = parse_url( $url );
 		$world_ip = $this->global_ip_for_host( $url_parts['host'] );
 
-    $curl = curl_init();
+		$curl = curl_init();
 
 		// If we can't find a world routable IP, fall back on local routing
 		if ( ! empty( $world_ip ) ) {
 
 			if ( ! empty( $url_parts['query'] ) ) {
-      	$url_parts['path'] .= '?' . $url_parts['query'];
+				$url_parts['path'] .= '?' . $url_parts['query'];
 			}
 
-	    $headers = array('Host: ' . $url_parts['host']);
+			$headers = array('Host: ' . $url_parts['host']);
 
-	    $url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
-      curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-	  }
+			$url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
+			curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+		}
 
 		curl_setopt( $curl, CURLOPT_URL, $url );
-		curl_setopt( $curl, CURLOPT_HEADER, TRUE );
-		curl_setopt( $curl, CURLOPT_NOBODY, TRUE );
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
+		curl_setopt( $curl, CURLOPT_HEADER, true );
+		curl_setopt( $curl, CURLOPT_NOBODY, true );
+		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5);
 		$header_info = curl_exec( $curl );
 		curl_close( $curl );
 
 		if ( ! $header_info) {
-			return FALSE;
+			return false;
 		}
 
 		$file_type_pattern = '/Content-Type:\s?([^\s]+)/i';
@@ -1188,7 +1192,7 @@ class WP_Import extends WP_Importer {
 			$results['filename'] = basename( $url_parts['path'] );
 		}
 
-		if ( ( $index = strripos( $results['filename'], '.' ) ) !== FALSE ) {
+		if ( ( $index = strripos( $results['filename'], '.' ) ) !== false ) {
 
 			$results['ext'] = substr( $results['filename'], $index + 1 );
 
@@ -1217,21 +1221,21 @@ class WP_Import extends WP_Importer {
 		} else {
 
 			if ( ! empty( $url_parts['query'] ) ) {
-      	$url_parts['path'] .= '?' . $url_parts['query'];
+				$url_parts['path'] .= '?' . $url_parts['query'];
 			}
 
-	    $headers = array('Host: ' . $url_parts['host']);
+			$headers = array('Host: ' . $url_parts['host']);
 
-	    $url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
+			$url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
 
-      $curl = curl_init();
-      curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-      curl_setopt( $curl, CURLOPT_URL, $url );
-      curl_setopt( $curl, CURLOPT_HEADER, FALSE );
-      curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
+			$curl = curl_init();
+			curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+			curl_setopt( $curl, CURLOPT_URL, $url );
+			curl_setopt( $curl, CURLOPT_HEADER, false );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 
-      $result = curl_exec( $curl );
-      $response_headers = curl_getinfo( $curl );
+			$result = curl_exec( $curl );
+			$response_headers = curl_getinfo( $curl );
 
 			// Now, map the CURL provided headers into the format that
 			// WP functions expect.
@@ -1240,7 +1244,7 @@ class WP_Import extends WP_Importer {
 				'content-length' => $response_headers['download_content_length'],
 			);
 
-      curl_close( $curl );
+			curl_close( $curl );
 
 			if ( false == $file_path )
 				return $wp_headers;
@@ -1270,9 +1274,9 @@ class WP_Import extends WP_Importer {
 	 */
 	function global_ip_for_host($host) {
 
-		if( ! class_exists( 'WP_Http' ) ) {
-    	include_once( ABSPATH . WPINC. '/class-http.php' );
-    }
+		if ( ! class_exists( 'WP_Http' ) ) {
+			include_once( ABSPATH . WPINC . '/class-http.php' );
+		}
 
 		static $ips;
 
@@ -1283,15 +1287,16 @@ class WP_Import extends WP_Importer {
 				'body' => array(
 					'host' => $host,
 				),
+				'sslverify' => false,
 			);
 
-			$service_url = 'http://tp2wp.com/services/dns';
+			$service_url = 'https://tp2wp.com/services/dns';
 
 			$result = wp_remote_post($service_url, $request);
 
 			if ( empty ( $result['body'] )) {
 
-				$ips[$host] = FALSE;
+				$ips[$host] = false;
 
 			} else {
 
@@ -1299,7 +1304,7 @@ class WP_Import extends WP_Importer {
 
 				$ips[$host] = isset( $body->ip )
 					? $body->ip
-					: FALSE;
+					: false;
 			}
 		}
 

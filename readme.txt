@@ -33,7 +33,8 @@ The quickest method for installing the importer is:
 == Changelog ==
 
 = 0.6.4 =
-* Bug fixes in DNS lookup
+* Usage of ssl when doing global host name resolution (when finding where to fetch and attachment from) 
+* Bug fix for issue when URLs wouldn't be rewritten for attachments without an extension
 
 = 0.6.3 =
 * Adds site IP address verification through third-party lookup to stop self-referencing server setups from preventing importation of files.

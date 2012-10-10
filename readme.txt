@@ -4,7 +4,7 @@ Donate link:
 Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0
 Tested up to: 3.4
-Stable tag: 0.6.3
+Stable tag: 0.6.4
 
 Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 
@@ -32,6 +32,9 @@ The quickest method for installing the importer is:
 
 == Changelog ==
 
+= 0.6.4 =
+* Bug fixes in DNS lookup
+
 = 0.6.3 =
 * Adds site IP address verification through third-party lookup to stop self-referencing server setups from preventing importation of files.
 
@@ -48,6 +51,8 @@ A message like "Fatal error: Allowed memory size of 8388608 bytes exhausted" ind
 For those with shared hosting, the best alternative may be to consult hosting support to determine the safest approach for running the import. A host may be willing to temporarily lift the memory limit and/or run the process directly from their end.
 
 More Info: [WordPress Codex: Importing Content](http://codex.wordpress.org/Importing_Content#Before_Importing)
+
+More Info: [tp2wp.com/faq](http://tp2wp.com/faq)
 
 == Filters ==
 

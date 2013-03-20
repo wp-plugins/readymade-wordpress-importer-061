@@ -5,7 +5,7 @@ Plugin URI: http://wordpress.org/extend/plugins/wordpress-importer/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.4
+Version: 0.6.5
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -102,8 +102,6 @@ class WP_Import extends WP_Importer {
 	 * @param string $file Path to the WXR file for importing
 	 */
 	function import( $file ) {
-		set_time_limit(600);
-		ini_set('max_input_time', 600);
 		add_filter( 'import_post_meta_key', array( $this, 'is_valid_meta_key' ) );
 		add_filter( 'http_request_timeout', array( &$this, 'bump_request_timeout' ) );
 
@@ -122,7 +120,6 @@ class WP_Import extends WP_Importer {
 		$this->backfill_parents();
 		$this->backfill_attachment_urls();
 		$this->remap_featured_images();
-
 		$this->import_end();
 	}
 
@@ -524,7 +521,9 @@ class WP_Import extends WP_Importer {
 	 * Note that new/updated terms, comments and meta are imported for the last of the above.
 	 */
 	function process_posts() {
+
 		foreach ( $this->posts as $post ) {
+
 			if ( ! post_type_exists( $post['post_type'] ) ) {
 				printf( __( 'Failed to import &#8220;%s&#8221;: Invalid post type %s', 'wordpress-importer' ),
 					esc_html($post['post_title']), esc_html($post['post_type']) );
@@ -597,15 +596,25 @@ class WP_Import extends WP_Importer {
 					}
 
 					$comment_post_ID = $post_id = $this->process_attachment( $postdata, $remote_url );
+
 				} else {
+
 					$comment_post_ID = $post_id = wp_insert_post( $postdata, true );
+
 				}
 
 				if ( is_wp_error( $post_id ) ) {
-					printf( __( 'Failed to import %s &#8220;%s&#8221;', 'wordpress-importer' ),
-						$post_type_object->labels->singular_name, esc_html($post['post_title']) );
-					if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG )
+					if ( $postdata['post_type'] === 'attachment' ) {
+						printf( __( 'Failed to import %s &#8220;%s&#8221; (%s)', 'wordpress-importer' ),
+							$post_type_object->labels->singular_name, esc_html($post['post_title']),
+							! empty($post['attachment_url']) ? $post['attachment_url'] : $post['guid']);
+					} else {
+						printf( __( 'Failed to import %s &#8220;%s&#8221;', 'wordpress-importer' ),
+							$post_type_object->labels->singular_name, esc_html($post['post_title']) );
+					}
+					if ( defined('IMPORT_DEBUG') && IMPORT_DEBUG ) {
 						echo ': ' . $post_id->get_error_message();
+					}
 					echo '<br />';
 					continue;
 				}
@@ -876,7 +885,7 @@ class WP_Import extends WP_Importer {
 		// Some systems, like moveable-type / typepad, advertise files w/o
 		// extension information attached.	We can get around this limitation
 		// by grabbing information about the file from the webserver
-		$file_type = wp_check_filetype($file_name);
+		$file_type = wp_check_filetype( $file_name );
 
 		// If there is a situation where we're adding a file extension
 		// onto an upload that didn't originally have one, we
@@ -893,8 +902,25 @@ class WP_Import extends WP_Importer {
 			}
 		}
 
-		// get placeholder file in the upload dir with a unique, sanitized filename
-		$upload = wp_upload_bits( $file_name, 0, '', $post['upload_date'] );
+		// First check and see if the file already exists on date, in which
+		// case we'll just use the version on disk instead of downloading
+		// again.
+		$upload_dir = wp_upload_dir( $post['upload_date'] );
+		$possible_existing_file = $upload_dir['path'] . '/' . $file_name;
+		if ( is_file( $possible_existing_file ) && filesize( $possible_existing_file ) > 0 ) {
+
+			$upload = array(
+				'file' => $possible_existing_file,
+				'url' => $upload_dir['url'] . '/' . $file_name,
+				'error' => false,
+			);
+		}
+		else {
+
+			// get placeholder file in the upload dir with a unique, sanitized filename
+			$upload = wp_upload_bits( $file_name, 0, '', $post['upload_date'] );
+		}
+
 		if ( $upload['error'] )
 			return new WP_Error( 'upload_dir_error', $upload['error'] );
 
@@ -1104,7 +1130,7 @@ class WP_Import extends WP_Importer {
 	 * @return int Maximum attachment file size to import
 	 */
 	function max_attachment_size() {
-		return apply_filters( 'import_attachment_size_limit', 0 );
+		return apply_filters( 'import_attachment_size_limit', 10000000 );
 	}
 
 	/**
@@ -1165,6 +1191,8 @@ class WP_Import extends WP_Importer {
 		curl_setopt( $curl, CURLOPT_URL, $url );
 		curl_setopt( $curl, CURLOPT_HEADER, true );
 		curl_setopt( $curl, CURLOPT_NOBODY, true );
+		curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, true );
+		curl_setopt( $curl, CURLOPT_MAXREDIRS, 10 );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5);
 		$header_info = curl_exec( $curl );
@@ -1210,6 +1238,17 @@ class WP_Import extends WP_Importer {
 
 	function fetch_attachment($url, $file_path) {
 
+		// If the file already exists locally, we don't need to re-download
+		// it.  We can instead just read the relevant info off the disk
+		// and save some network time
+		if ( file_exists( $file_path ) && filesize( $file_path ) > 100) {
+
+			return array(
+				'response' => '200',
+				'content-length' => filesize( $file_path ),
+			);
+		}
+
 		$url_parts = parse_url( $url );
 		$world_ip = $this->global_ip_for_host( $url_parts['host'] );
 
@@ -1226,12 +1265,14 @@ class WP_Import extends WP_Importer {
 
 			$headers = array('Host: ' . $url_parts['host']);
 
-			$url = $url_parts['scheme'] . "://" . $world_ip . $url_parts['path'];
+			$url = $url_parts['scheme'] . "://" . $world_ip . str_replace(' ', '%20', $url_parts['path']);
 
 			$curl = curl_init();
 			curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
 			curl_setopt( $curl, CURLOPT_URL, $url );
 			curl_setopt( $curl, CURLOPT_HEADER, false );
+			curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, true );
+			curl_setopt( $curl, CURLOPT_MAXREDIRS, 10 );
 			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 
 			$result = curl_exec( $curl );

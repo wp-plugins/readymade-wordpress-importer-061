@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: ReadyMadeWeb
-Donate link: 
+Donate link:
 Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0
 Tested up to: 3.4
-Stable tag: 0.6.4
+Stable tag: 0.6.5
 
 Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 
@@ -32,8 +32,11 @@ The quickest method for installing the importer is:
 
 == Changelog ==
 
+= 0.6.5 =
+* Better handling for file names with url-unfriendly characters
+
 = 0.6.4 =
-* Usage of ssl when doing global host name resolution (when finding where to fetch and attachment from) 
+* Usage of ssl when doing global host name resolution (when finding where to fetch and attachment from)
 * Bug fix for issue when URLs wouldn't be rewritten for attachments without an extension
 
 = 0.6.3 =

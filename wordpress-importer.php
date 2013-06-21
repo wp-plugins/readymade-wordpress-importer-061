@@ -5,7 +5,7 @@ Plugin URI: http://wordpress.org/extend/plugins/wordpress-importer/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.6
+Version: 0.6.7
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -1030,6 +1030,8 @@ class WP_Import extends WP_Importer {
 				SET
 					post_content = REPLACE(post_content, %s, %s),
 					post_excerpt = REPLACE(post_excerpt, %s, %s)",
+				$from_url,
+				$to_url,
 				$from_url,
 				$to_url
 			) );

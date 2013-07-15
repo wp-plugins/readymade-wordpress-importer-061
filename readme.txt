@@ -4,7 +4,7 @@ Donate link:
 Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 0.6.8
+Stable tag: 0.6.9
 
 Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 
@@ -31,6 +31,11 @@ The quickest method for installing the importer is:
 1. Go to the Tools -> Import screen, click on 'ReadyMade WordPress Importer'
 
 == Changelog ==
+
+= 0.6.9 =
+* Update post GUIDs post import to reflect currently set domain name, not example.org
+* Correct URL of plugin on wordpress.org
+* Fix issues with escaped file names as attachments
 
 = 0.6.8 =
 * Fix issue with posts and tags being added multiple times (original importer bug)

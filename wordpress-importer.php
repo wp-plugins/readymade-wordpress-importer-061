@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: ReadyMade WordPress Importer
-Plugin URI: http://wordpress.org/extend/plugins/wordpress-importer/
+Plugin URI: https://wordpress.org/plugins/readymade-wordpress-importer-061/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.8
+Version: 0.6.9
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -120,6 +120,7 @@ class WP_Import extends WP_Importer {
 		$this->backfill_parents();
 		$this->backfill_attachment_urls();
 		$this->remap_featured_images();
+		$this->update_guids();
 		$this->import_end();
 	}
 
@@ -919,7 +920,8 @@ class WP_Import extends WP_Importer {
 		else {
 
 			// get placeholder file in the upload dir with a unique, sanitized filename
-			$upload = wp_upload_bits( $file_name, 0, '', $post['upload_date'] );
+			$unescaped_file_name = urldecode( $file_name );
+			$upload = wp_upload_bits( $unescaped_file_name, 0, '', $post['upload_date'] );
 		}
 
 		if ( $upload['error'] )
@@ -1054,6 +1056,32 @@ class WP_Import extends WP_Importer {
 					update_post_meta( $post_id, '_thumbnail_id', $new_id );
 			}
 		}
+	}
+
+	/**
+	 * Update all post guids so that they match the current domain, not the
+	 * example.org domain that the importer uses in the WXR file.
+	 */
+	function update_guids() {
+
+		global $wpdb;
+
+		// If the current site domain ends in a "/", we can just strip it off
+		// here so we only have to do slightly less work when updating the
+		// GUIDs in the posts table
+		$current_site_root = trim( get_option( 'siteurl', 'http://example.org/' ) );
+		if ( substr( $current_site_root, -1 ) === '/' ) {
+			$current_site_root = substr( $current_site_root, 0, -1 );
+		}
+
+		$query = "
+			UPDATE
+				{$wpdb->posts}
+			SET
+				guid = REPLACE(guid, %s, %s)
+		";
+
+		$wpdb->query( $wpdb->prepare( $query, 'http://example.org', $current_site_root ) );
 	}
 
 	/**

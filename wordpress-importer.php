@@ -5,7 +5,7 @@ Plugin URI: http://wordpress.org/extend/plugins/wordpress-importer/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.7
+Version: 0.6.8
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -397,7 +397,8 @@ class WP_Import extends WP_Importer {
 
 		foreach ( $this->categories as $cat ) {
 			// if the category already exists leave it alone
-			$term_id = term_exists( $cat['category_nicename'], 'category' );
+			$term_id = term_exists( $cat['cat_name'], 'category' );
+
 			if ( $term_id ) {
 				if ( is_array($term_id) ) $term_id = $term_id['term_id'];
 				if ( isset($cat['term_id']) )
@@ -441,7 +442,7 @@ class WP_Import extends WP_Importer {
 
 		foreach ( $this->tags as $tag ) {
 			// if the tag already exists leave it alone
-			$term_id = term_exists( $tag['tag_slug'], 'post_tag' );
+			$term_id = term_exists( $tag['tag_name'], 'post_tag' );
 			if ( $term_id ) {
 				if ( is_array($term_id) ) $term_id = $term_id['term_id'];
 				if ( isset($tag['term_id']) )
@@ -632,7 +633,7 @@ class WP_Import extends WP_Importer {
 				foreach ( $post['terms'] as $term ) {
 					// back compat with WXR 1.0 map 'tag' to 'post_tag'
 					$taxonomy = ( 'tag' == $term['domain'] ) ? 'post_tag' : $term['domain'];
-					$term_exists = term_exists( $term['slug'], $taxonomy );
+					$term_exists = term_exists( $term['name'], $taxonomy );
 					$term_id = is_array( $term_exists ) ? $term_exists['term_id'] : $term_exists;
 					if ( ! $term_id ) {
 						$t = wp_insert_term( $term['name'], $taxonomy, array( 'slug' => $term['slug'] ) );

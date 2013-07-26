@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/plugins/readymade-wordpress-importer-061/
 Description: Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.
 Author: wordpressdotorg, snyderp@gmail.com
 Author URI: http://readymadeweb.com
-Version: 0.6.9
+Version: 0.6.10
 Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
@@ -1294,7 +1294,7 @@ class WP_Import extends WP_Importer {
 		// If we can't find a world routable IP, fall back on local routing
 		if ( empty( $world_ip ) ) {
 
-			return wp_get_http( $url, $upload['file'] );
+			return wp_get_http( $url, $file_path );
 
 		} else {
 

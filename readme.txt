@@ -3,7 +3,7 @@ Contributors: ReadyMadeWeb
 Donate link:
 Tags: importer, wordpress, typepad, movabletype, attachments, import, uploads, transfer
 Requires at least: 3.0
-Tested up to: 3.5
+Tested up to: 3.6
 Stable tag: 0.6.10
 
 Import posts, pages, comments, custom fields, categories, tags and more from a WordPress export file.

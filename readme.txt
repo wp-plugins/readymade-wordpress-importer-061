@@ -10,13 +10,13 @@ Import posts, pages, comments, custom fields, categories, tags and more from a W
 
 == Description ==
 
-NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/) and should now be considered deprecated. 
+NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/). 
 
 For more information visit [TP2WP.com](http://tp2wp.com)
 
 == Installation ==
 
-NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/) and should now be considered deprecated.
+NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/).
 
 For more information visit [TP2WP.com](http://tp2wp.com)
 
@@ -28,7 +28,7 @@ The quickest method for installing the importer is:
 
 == Changelog ==
 
-NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/) and should now be considered deprecated.
+NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/).
 
 For more information visit [TP2WP.com](http://tp2wp.com)
 
@@ -64,6 +64,6 @@ For more information visit [TP2WP.com](http://tp2wp.com)
 
 == Frequently Asked Questions ==
 
-NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/) and should now be considered deprecated.
+NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/).
 
 For more information visit [TP2WP.com](http://tp2wp.com)

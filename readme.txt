@@ -14,18 +14,6 @@ NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.
 
 For more information visit [TP2WP.com](http://tp2wp.com)
 
-== Installation ==
-
-NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/).
-
-For more information visit [TP2WP.com](http://tp2wp.com)
-
-The quickest method for installing the importer is:
-
-1. Upload the `readymade-wordpress-importer` folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Go to the Tools -> Import screen, click on 'ReadyMade WordPress Importer'
-
 == Changelog ==
 
 NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/).
@@ -61,9 +49,3 @@ For more information visit [TP2WP.com](http://tp2wp.com)
 
 = 0.6.2 =
 * Reads MIME type for files without proper file extensions.
-
-== Frequently Asked Questions ==
-
-NOTE: This plugin has been superseded by the [TP2WP Importer](https://wordpress.org/plugins/tp2wp-importer/).
-
-For more information visit [TP2WP.com](http://tp2wp.com)
